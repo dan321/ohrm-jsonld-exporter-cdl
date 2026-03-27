@@ -2,9 +2,13 @@
 from ohrm_converter.exporters.earrship import export_earrships
 from ohrm_converter.exporters.edorship import export_edorships
 from ohrm_converter.exporters.efrship import export_efrships
+from ohrm_converter.exporters.eprrship import export_eprrships
+from ohrm_converter.exporters.prreprship import export_prreprships
 from ohrm_converter.exporters.relatedentity import export_relatedentities
 from ohrm_converter.exporters.relatedresource import export_relatedresources
-from ohrm_converter.models import EARRship, EDORship, EFRship, RelatedEntity, RelatedResource
+from ohrm_converter.models import (
+    EARRship, EDORship, EFRship, EPRRship, PRREPRship, RelatedEntity, RelatedResource,
+)
 
 class TestRelatedEntity:
     def test_basic_export(self):
@@ -53,6 +57,38 @@ class TestEDORship:
         main = [e for e in result if e.get("identifier") == "D001-E001"]
         assert len(main) == 1
         assert main[0]["source"] == {"@id": "#D001"}
+
+class TestEPRRship:
+    def test_basic_export(self):
+        rows = [EPRRship(eid="E001", pubid="P001", relationship="Author of")]
+        result = export_eprrships(rows)
+        main = [e for e in result if e.get("identifier") == "P001-E001"]
+        assert len(main) == 1
+        assert main[0]["@type"] == ["Relationship", "Author_of"]
+        assert main[0]["source"] == {"@id": "#P001"}
+        assert main[0]["target"] == {"@id": "#E001"}
+
+    def test_skips_missing_keys(self):
+        rows = [EPRRship(eid="E001")]
+        result = export_eprrships(rows)
+        assert len(result) == 0
+
+
+class TestPRREPRship:
+    def test_basic_export(self):
+        rows = [PRREPRship(pubid="P001", repid="R001", prrepdescription="Held at")]
+        result = export_prreprships(rows)
+        main = [e for e in result if e.get("identifier") == "P001-R001"]
+        assert len(main) == 1
+        assert main[0]["@type"] == ["Relationship"]
+        assert main[0]["source"] == {"@id": "#P001"}
+        assert main[0]["target"] == {"@id": "#R001"}
+
+    def test_skips_missing_keys(self):
+        rows = [PRREPRship(pubid="P001")]
+        result = export_prreprships(rows)
+        assert len(result) == 0
+
 
 class TestEFRship:
     def test_basic_export(self):

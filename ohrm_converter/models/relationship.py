@@ -85,6 +85,35 @@ class RelatedEntity(BaseModel):
     reorder: int | None = None
 
 
+class EPRRship(BaseModel):
+    eid: str | None = None
+    pubid: str | None = None
+    relationship: str | None = None
+    description: str | None = None
+    rating: float | None = None
+    eprstartdate: str | None = None
+    eprsdatemod: str | None = None
+    eprstart: str | None = None
+    eprenddate: str | None = None
+    epredatemod: str | None = None
+    eprend: str | None = None
+    eprplace: str | None = None
+    eprcitation: str | None = None
+    eprprepared: str | None = None
+    eprappenddate: str | None = None
+    eprlastmodd: str | None = None
+    eprereference: int | None = None
+
+
+class PRREPRship(BaseModel):
+    pubid: str | None = None
+    repid: str | None = None
+    prrepref: str | None = None
+    prrepdescription: str | None = None
+    prrepappenddate: str | None = None
+    prreplastmodd: str | None = None
+
+
 class RelatedResource(BaseModel):
     rrno: int
     rtype: str | None = None

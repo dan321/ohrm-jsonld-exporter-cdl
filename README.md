@@ -57,10 +57,26 @@ uv run pytest tests/ -v
   - `loader.py` — SQL cleaning and SQLite loading
   - `crate.py` — RO-Crate assembly and relationship linking
   - `models/` — Pydantic models for the OHRM database schema
-  - `exporters/` — 13 per-table exporters (DB rows → JSON-LD entities)
+  - `exporters/` — 15 per-table exporters (DB rows → JSON-LD entities)
 - `tests/` — pytest test suite
 - `figshare.py` — Standalone Figshare upload script (optional, `uv sync --extra figshare`)
 - `legacy/` — Original Node.js implementation (reference only)
+
+## OHRM Tables Coverage
+
+The converter exports all core data and relationship tables from the OHRM schema. The following tables are **not exported** as they contain web display configuration, lookup enums, or application metadata rather than heritage record data:
+
+| Category | Tables | Reason |
+|---|---|---|
+| Web display config | `html` (100+ display columns), `htmladditional`, `htmlicon`, `htmlvariables` | Page layout, colours, stylesheets — not heritage data. `html.title`, `html.creator`, `html.description` are read for RO-Crate root metadata. |
+| Lookup/enum tables | `typeofentity`, `typeofresource`, `typeofwork`, `typeofformat`, `typeofcontent`, `typeofarformats`, `relationships`, `resourcerelationships`, `subject`, `decades` | Reference values already embedded in data rows |
+| Contacts | `contact`, `ecrship` | Contact people and entity↔contact links |
+| Categories | `category`, `catership` | Category definitions and entity↔category links |
+| Sponsorship | `sponsors`, `spons_entity`, `spons_entity_updates`, `spons_type` | Funding and sponsorship data |
+| System config | `ohrmsystem`, `repository` | OHRM system metadata and repository definitions |
+| Features | `onthisday`, `dataentryprotocol` | Web feature config and data entry workflow |
+
+If any of these tables contain data relevant to your use case, they can be added as new exporters following the existing pattern in `ohrm_converter/exporters/`.
 
 ## Figshare Upload (Optional)
 
