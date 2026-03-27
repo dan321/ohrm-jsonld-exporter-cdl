@@ -52,6 +52,9 @@ ohrm-jsonld-exporter-cdl/
 │       ├── edorship.py
 │       └── efrship.py
 ├── tests/                        # pytest test suite
+├── scripts/
+│   ├── batch_test.py             # Batch converter run + comparison against reference output
+│   └── pg_validate.py            # Row-level validation of SQLite output against PostgreSQL
 ├── figshare.py                   # Standalone Figshare upload script (optional)
 └── legacy/                       # Original Node.js implementation (reference only)
 ```
@@ -90,8 +93,12 @@ uv run pytest tests/ -v
 | Command | Description |
 |---------|-------------|
 | `uv sync` | Install dependencies |
+| `uv sync --extra dev` | Install with dev/test dependencies |
+| `uv sync --extra validate` | Install with psycopg2 for pg_validate |
 | `ohrm-converter <input> -o <output>` | Convert OHRM dumps to RO-Crate JSON-LD |
 | `uv run pytest tests/ -v` | Run full test suite |
+| `python scripts/batch_test.py <downloads/>` | Batch convert and compare against reference output |
+| `python scripts/pg_validate.py <ohrm-path>` | Validate SQLite output against PostgreSQL row-for-row |
 
 ## Documentation
 
@@ -103,7 +110,7 @@ uv run pytest tests/ -v
 
 The converter follows a single-pass pipeline:
 
-1. **Load:** `loader.py` finds the OHRM's `ohrm/web/sql/` directory, resolves `\i` includes, cleans PostgreSQL syntax (type names, escape sequences, boolean values), and loads everything into a temporary SQLite database.
+1. **Load:** `loader.py` finds the OHRM's `ohrm/web/sql/` directory, resolves `\i` includes, cleans PostgreSQL syntax (type names, escape sequences, boolean values), and loads everything into a temporary SQLite database. Key edge cases in `clean_sql()`: use `split('\n')` not `splitlines()` (Unicode line separators such as U+2028 can appear inside string literals), read files with `encoding='utf-8-sig'` (some OHRM init scripts have a UTF-8 BOM that breaks `\i` detection), and always emit `CREATE TABLE IF NOT EXISTS` (the same table can appear in both the schema file and data files).
 
 2. **Export:** 13 exporters each read their table via `fetch_all()`, map rows to JSON-LD entity dicts using `map_properties()`, and extract stub entities (Person, Place, State, Country, Nationality) for deduplication.
 
