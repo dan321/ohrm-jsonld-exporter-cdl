@@ -5,108 +5,110 @@
 
 ## Project Overview
 
-OHRM JSON-LD Exporter — a tool that dumps an OHRM (Open Heritage Records Management) PostgreSQL database to JSON-LD format using the RO-Crate standard. A Node.js CLI reads the database via Sequelize, runs per-table exporters to build an RO-Crate graph, and outputs `ro-crate-metadata.json`. A Python automation layer orchestrates batch conversion and uploads results to Figshare.
+OHRM Converter — a Python CLI tool that converts OHRM (Online Heritage Records Management) database dumps into RO-Crate JSON-LD format. It loads PostgreSQL SQL dumps into a temporary SQLite database, runs per-table exporters to build an RO-Crate graph, and outputs `ro-crate-metadata.json`. No Docker or PostgreSQL installation required.
 
 ## Tech Stack
 
-- **Languages:** JavaScript (Node.js 18), Python 3.12
-- **ORM:** Sequelize 6
-- **Package manager:** npm (Node.js), uv (Python)
-- **Database:** PostgreSQL 13
-- **Containerisation:** Docker Compose
-- **Key Node.js deps:** `ro-crate`, `ro-crate-html`, `sequelize`, `sequelize-auto`, `pg`, `yargs`, `lodash`, `fs-extra`
-- **Key Python deps:** `docker`, `pyyaml`, `requests`
+- **Language:** Python 3.12
+- **Package manager:** uv
+- **Build backend:** hatchling
+- **CLI:** Typer
+- **Data models:** Pydantic
+- **RO-Crate:** ro-crate-py
+- **Database:** SQLite (stdlib, temporary — loads from PostgreSQL SQL dumps)
 
 ## Directory Structure
 
 ```
 ohrm-jsonld-exporter-cdl/
-├── index.js                 # Main CLI entry point
-├── configuration.js         # DB connection, domain prefix, RO-Crate defaults
-├── convert-and-upload.py    # Python: batch convert + Figshare upload
-├── figshare.py              # Figshare API integration (chunked upload)
-├── docker-compose.yml       # PostgreSQL + Node.js exporter services
-├── package.json             # Node.js manifest
-├── pyproject.toml            # Python project and dependency definition
-├── exporters/               # One exporter class per OHRM table
-│   ├── index.js             # Re-exports all exporters
-│   ├── entity.js            # Entity exporter
-│   ├── arcresource.js       # Archival resource exporter
-│   ├── dobject.js           # Digital object exporter
-│   └── ...                  # ~15 more domain exporters
-├── models/                  # Sequelize models (auto-generated from DB)
-│   ├── init-models.js       # Model initialisation
-│   └── ...                  # ~45 models matching OHRM schema
-└── README.md
+├── pyproject.toml                # hatchling build, CLI entry point, dependencies
+├── .python-version               # Python 3.12
+├── uv.lock
+├── ohrm_converter/               # Main package
+│   ├── __init__.py
+│   ├── cli.py                    # Typer CLI — batch OHRM discovery and conversion
+│   ├── config.py                 # RO-Crate 1.1 spec constants
+│   ├── loader.py                 # SQL cleaning (Postgres→SQLite) + temp DB lifecycle
+│   ├── crate.py                  # RO-Crate assembly, dedup, relationship linking
+│   ├── models/                   # Pydantic models (one per OHRM table)
+│   │   ├── entity.py             # Entity, EntityEvent, EntityName
+│   │   ├── resource.py           # ArcResource, DObject, DObjectVersion, PubResource
+│   │   ├── function.py           # Function
+│   │   ├── relationship.py       # EARRship, EDORship, EFRship, RelatedEntity, RelatedResource
+│   │   └── metadata.py           # Html, HtmlMetadata
+│   └── exporters/                # One exporter per table → JSON-LD entities
+│       ├── base.py               # Shared: map_properties(), extract_entity()
+│       ├── entity.py
+│       ├── arcresource.py
+│       ├── dobject.py
+│       ├── dobjectversion.py
+│       ├── entityevent.py
+│       ├── entityname.py
+│       ├── function.py
+│       ├── pubresource.py
+│       ├── relatedentity.py
+│       ├── relatedresource.py
+│       ├── earrship.py
+│       ├── edorship.py
+│       └── efrship.py
+├── tests/                        # pytest test suite
+├── figshare.py                   # Standalone Figshare upload script (optional)
+└── legacy/                       # Original Node.js implementation (reference only)
 ```
 
 ## Module Guide
 
-- **`index.js`** — CLI application: connects to DB, runs all exporters, assembles RO-Crate, writes JSON-LD output
-- **`exporters/`** — Per-table exporters, each with an `export()` method that maps DB rows to JSON-LD entities
-- **`models/`** — Sequelize ORM models reflecting the OHRM database schema
-- **`configuration.js`** — Centralised config: DB params (from env vars), domain prefix, RO-Crate context/descriptor
-- **`convert-and-upload.py`** — Python orchestration: discovers OHRMs, invokes Node.js conversion via Docker, uploads to Figshare
-- **`figshare.py`** — Figshare API client: article creation, chunked file uploads, authentication
+- **`cli.py`** — Typer CLI entry point: discovers OHRM folders, orchestrates batch conversion
+- **`loader.py`** — Cleans PostgreSQL SQL syntax for SQLite, loads into temp DB, provides `fetch_all()` helper
+- **`crate.py`** — Runs all exporters, deduplicates extracted entities, links relationships bidirectionally, writes RO-Crate output
+- **`models/`** — Pydantic BaseModel classes matching the fixed OHRM database schema
+- **`exporters/`** — 13 exporters mapping DB rows to JSON-LD entities via property mappings and entity extraction
+- **`figshare.py`** — Standalone Figshare upload client (not part of the converter package)
 
 ## Getting Started
 
 ```bash
-# Start Docker services (PostgreSQL + exporter container)
-docker compose up -d
-
-# Load an OHRM database dump into the DB container
-docker exec -it ohrm-jsonld-exporter-db-1 /bin/bash
-# Inside container: psql -U postgres < /srv/data/<dump>.sql
-
-# Run conversion (stdout)
-docker exec -it ohrm-jsonld-exporter-exporter-1 bash
-node .
-
-# Run conversion (to file)
-export DB_DATABASE='dhra'
-node . -o ./data/dhra-jsonld
-
-# Python batch workflow (outside Docker)
+# Install
 uv sync
-uv run python convert-and-upload.py -d <ohrm_dir> -a <figshare_endpoint> -t <token>
+
+# Convert all OHRMs in a directory
+ohrm-converter ./path/to/ohrm-collection/ -o output/
+
+# Run tests
+uv run pytest tests/ -v
 ```
 
 ## Testing
 
-- **No formal test framework** — `package.json` has no test runner configured
-- **Manual testing:** load sample OHRM databases into Docker, run the exporter, inspect `ro-crate-metadata.json` output
+- **Framework:** pytest
+- **Location:** `tests/`
+- **Run:** `uv run pytest tests/ -v`
+- **Coverage:** unit tests for loader, models, all 13 exporters, CLI; integration test against ULSS reference data
 
 ## Key Commands
 
 | Command | Description |
 |---------|-------------|
-| `docker compose up -d` | Start PostgreSQL + exporter containers |
-| `node .` | Convert current DB to JSON-LD (stdout) |
-| `node . -o ./data/<dir>` | Convert and write to output directory |
-| `node . -d <dbname>` | Convert a specific database |
-| `python convert-and-upload.py` | Batch convert + upload to Figshare |
-
-## Environment Variables
-
-| Variable | Purpose |
-|----------|---------|
-| `DB_DATABASE` | PostgreSQL database name |
-| `DB_USER` | PostgreSQL username |
-| `DB_PASSWORD` | PostgreSQL password |
-| `DB_HOST` | PostgreSQL host (default: `db` in Docker) |
+| `uv sync` | Install dependencies |
+| `ohrm-converter <input> -o <output>` | Convert OHRM dumps to RO-Crate JSON-LD |
+| `uv run pytest tests/ -v` | Run full test suite |
 
 ## Documentation
 
-- `README.md` — Setup instructions, Docker workflow, CLI usage, Python automation guide
+- `README.md` — Setup instructions, usage, project background
 - `LICENCE` — GPL-3.0
+- `docs/superpowers/specs/` — Design specification (gitignored)
 
 ## Architecture Notes
 
-The system follows a two-phase pipeline:
+The converter follows a single-pass pipeline:
 
-1. **Export (Node.js):** `index.js` initialises Sequelize models against the OHRM PostgreSQL schema, then iterates through each exporter in `exporters/`. Each exporter queries its table, maps rows to Schema.org-typed JSON-LD entities, and adds them to an `ROCrate` instance. After all exporters run, cross-entity relationships are linked, and the crate is serialised as `ro-crate-metadata.json`.
+1. **Load:** `loader.py` finds the OHRM's `ohrm/web/sql/` directory, resolves `\i` includes, cleans PostgreSQL syntax (type names, escape sequences, boolean values), and loads everything into a temporary SQLite database.
 
-2. **Orchestration (Python):** `convert-and-upload.py` scans a directory of OHRM database dumps, spins up Docker containers for each, runs the Node.js exporter, packages the output, and uploads to Figshare via the API client in `figshare.py`.
+2. **Export:** 13 exporters each read their table via `fetch_all()`, map rows to JSON-LD entity dicts using `map_properties()`, and extract stub entities (Person, Place, State, Country, Nationality) for deduplication.
 
-The domain prefix (`https://ctac.esrc.unimelb.edu.au`) is hardcoded in `configuration.js` and used to mint entity URIs.
+3. **Assemble:** `crate.py` collects all exporter output, deduplicates extracted entities by `@id`, adds everything to an `ROCrate` instance, links relationships bidirectionally (`sourceOf`/`targetOf`), removes orphaned relationships, and writes `ro-crate-metadata.json`.
+
+4. **Cleanup:** The temporary SQLite database is deleted when the context manager exits.
+
+Root dataset metadata (title, creator, description, URL) is read from the `html` and `htmlmetadata` tables within the OHRM data itself — no external configuration required.
