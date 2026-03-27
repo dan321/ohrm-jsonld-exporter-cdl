@@ -1,20 +1,31 @@
 """DObject exporter."""
 from __future__ import annotations
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import DObject, DObjectVersion
 
-PROPERTY_MAPPINGS = [
-    ("dostartdate", "startDate"), ("dosdatemod", "startDateModifier"),
-    ("dostart", "startDateISOString"), ("doenddate", "endDate"),
-    ("doedatemod", "endDateModifier"), ("doend", "endDateISOString"),
-    ("dophysdesc", "physicalDescription"), ("docreator", "resourceCreator"),
-    ("docontrol", "controlCode"), ("doreference", "note"),
-    ("dorights", "objectIPRights"), ("donotes", "processingNotes"),
-    ("dostatus", "outputStatus"), ("doappenddate", "recordAppendDate"),
-    ("dolastmodd", "recordLastModified"), "dointerpretation",
+PROPERTY_MAPPINGS = {
+    "dostartdate": "startDate",
+    "dosdatemod": "startDateModifier",
+    "dostart": "startDateISOString",
+    "doenddate": "endDate",
+    "doedatemod": "endDateModifier",
+    "doend": "endDateISOString",
+    "dophysdesc": "physicalDescription",
+    "docreator": "resourceCreator",
+    "docontrol": "controlCode",
+    "doreference": "note",
+    "dorights": "objectIPRights",
+    "donotes": "processingNotes",
+    "dostatus": "outputStatus",
+    "doappenddate": "recordAppendDate",
+    "dolastmodd": "recordLastModified",
+    "dointerpretation": "dointerpretation",
+}
+EXTRACT_ENTITIES = [
+    Extraction(entity_type="Person", field="doprepared", prop="preparedBy"),
+    Extraction(entity_type="Place", field="doplace", prop="place"),
 ]
-EXTRACT_ENTITIES = [("Person", "doprepared", "preparedBy"), ("Place", "doplace", "place")]
 
 def export_dobjects(rows: list[DObject], versions: list[DObjectVersion]) -> list[dict]:
     results: list[dict] = []

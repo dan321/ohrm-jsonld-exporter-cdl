@@ -1,18 +1,27 @@
 """EntityEvent exporter."""
 from __future__ import annotations
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import Entity, EntityEvent
 
-PROPERTY_MAPPINGS = [
-    ("eestartdate", "startDate"), ("eesdatemod", "dateModifier"),
-    ("eestart", "startDateISOString"), ("eeenddate", "endDate"),
-    ("eeedatemod", "endDateModifier"), ("eeend", "endDateISOString"),
-    ("eedatequal", "dateQualifier"), ("eenote", "processingNotes"),
-    "eerating", ("eeappenddate", "recordAppendDate"),
-    ("eelastmodd", "recordLastModified"), "otdid",
+PROPERTY_MAPPINGS = {
+    "eestartdate": "startDate",
+    "eesdatemod": "dateModifier",
+    "eestart": "startDateISOString",
+    "eeenddate": "endDate",
+    "eeedatemod": "endDateModifier",
+    "eeend": "endDateISOString",
+    "eedatequal": "dateQualifier",
+    "eenote": "processingNotes",
+    "eerating": "eerating",
+    "eeappenddate": "recordAppendDate",
+    "eelastmodd": "recordLastModified",
+    "otdid": "otdid",
+}
+EXTRACT_ENTITIES = [
+    Extraction(entity_type="Place", field="eelocation", prop="location"),
+    Extraction(entity_type="Person", field="eeprepared", prop="preparedBy"),
 ]
-EXTRACT_ENTITIES = [("Place", "eelocation", "location"), ("Person", "eeprepared", "preparedBy")]
 
 def export_entityevents(rows: list[EntityEvent], entities: list[Entity]) -> list[dict]:
     results: list[dict] = []

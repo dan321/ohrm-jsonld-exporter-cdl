@@ -1,17 +1,25 @@
 """Entity-ArchivalResource relationship exporter."""
 from __future__ import annotations
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import EARRship
 
-PROPERTY_MAPPINGS = [
-    ("earstartdate", "startDate"), ("earsdatemod", "startDateModifier"),
-    ("earstart", "startDateISOString"), ("earenddate", "endDate"),
-    ("earedatemod", "endDateModifer"), ("earend", "endDateISOString"),
-    ("earcitation", "citation"), ("earappenddate", "recordAppendDate"),
-    ("earlastmodd", "recordLastModified"), "earereference",
+PROPERTY_MAPPINGS = {
+    "earstartdate": "startDate",
+    "earsdatemod": "startDateModifier",
+    "earstart": "startDateISOString",
+    "earenddate": "endDate",
+    "earedatemod": "endDateModifer",
+    "earend": "endDateISOString",
+    "earcitation": "citation",
+    "earappenddate": "recordAppendDate",
+    "earlastmodd": "recordLastModified",
+    "earereference": "earereference",
+}
+EXTRACT_ENTITIES = [
+    Extraction(entity_type="Person", field="earprepared", prop="preparedBy"),
+    Extraction(entity_type="Place", field="earplace", prop="place"),
 ]
-EXTRACT_ENTITIES = [("Person", "earprepared", "preparedBy"), ("Place", "earplace", "place")]
 
 def export_earrships(rows: list[EARRship]) -> list[dict]:
     results: list[dict] = []

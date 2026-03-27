@@ -1,17 +1,26 @@
 """Entity-DObject relationship exporter."""
 from __future__ import annotations
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import EDORship
 
-PROPERTY_MAPPINGS = [
-    ("edostartdate", "startDate"), ("edosdatemod", "startDateModifier"),
-    ("edostart", "startDateISOString"), ("edoenddate", "endDate"),
-    ("edoedatemod", "endDateModifer"), ("edoend", "endDateISOString"),
-    ("edocitation", "citation"), ("edoappenddate", "recordAppendDate"),
-    ("edolastmodd", "recordLastModified"), "edoereference", "edogallery",
+PROPERTY_MAPPINGS = {
+    "edostartdate": "startDate",
+    "edosdatemod": "startDateModifier",
+    "edostart": "startDateISOString",
+    "edoenddate": "endDate",
+    "edoedatemod": "endDateModifer",
+    "edoend": "endDateISOString",
+    "edocitation": "citation",
+    "edoappenddate": "recordAppendDate",
+    "edolastmodd": "recordLastModified",
+    "edoereference": "edoereference",
+    "edogallery": "edogallery",
+}
+EXTRACT_ENTITIES = [
+    Extraction(entity_type="Person", field="edoprepared", prop="preparedBy"),
+    Extraction(entity_type="Place", field="edoplace", prop="place"),
 ]
-EXTRACT_ENTITIES = [("Person", "edoprepared", "preparedBy"), ("Place", "edoplace", "place")]
 
 def export_edorships(rows: list[EDORship]) -> list[dict]:
     results: list[dict] = []

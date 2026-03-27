@@ -1,21 +1,28 @@
 """Entity-Function relationship exporter."""
 from __future__ import annotations
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import EFRship
 
-PROPERTY_MAPPINGS = [
-    "rating",
-    ("efstartdate", "startDate"), ("efsdatemod", "startDateModifier"),
-    ("efstart", "startDateISOString"), ("efenddate", "endDate"),
-    ("efedatemod", "endDateModifer"), ("efend", "endDateISOString"),
-    ("efcitation", "citation"), ("efnote", "processingNotes"),
-    ("efappenddate", "recordAppendDate"), ("eflastmodd", "recordLastModified"),
-    "ordering",
-]
+PROPERTY_MAPPINGS = {
+    "rating": "rating",
+    "efstartdate": "startDate",
+    "efsdatemod": "startDateModifier",
+    "efstart": "startDateISOString",
+    "efenddate": "endDate",
+    "efedatemod": "endDateModifer",
+    "efend": "endDateISOString",
+    "efcitation": "citation",
+    "efnote": "processingNotes",
+    "efappenddate": "recordAppendDate",
+    "eflastmodd": "recordLastModified",
+    "ordering": "ordering",
+}
 EXTRACT_ENTITIES = [
-    ("Person", "efprepared", "preparedBy"), ("Place", "efplace", "place"),
-    ("State", "efplacestate", "state"), ("Country", "efplacecountry", "country"),
+    Extraction(entity_type="Person", field="efprepared", prop="preparedBy"),
+    Extraction(entity_type="Place", field="efplace", prop="place"),
+    Extraction(entity_type="State", field="efplacestate", prop="state"),
+    Extraction(entity_type="Country", field="efplacecountry", prop="country"),
 ]
 
 def export_efrships(rows: list[EFRship]) -> list[dict]:

@@ -2,21 +2,32 @@
 from __future__ import annotations
 import re
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import DObjectVersion
 
-PROPERTY_MAPPINGS = [
-    ("dovformat", "format"), ("dovdefault", "primaryVersion"), "dovattributes",
-    ("dovstartdate", "startDate"), ("dovsdatemod", "startDateModifier"),
-    ("dovstart", "startDateISOString"), ("dovenddate", "endDate"),
-    ("dovedatemod", "endDateModifier"), ("dovend", "endDateISOString"),
-    ("dovphysdesc", "physicalDescription"), ("dovcreator", "resourceCreator"),
-    ("dovcontrol", "controlCode"), ("dovreference", "note"),
-    ("dovnotes", "processingNotes"), ("dovstatus", "outputStatus"),
-    ("dovappenddate", "recordAppendDate"), ("dovlastmodd", "recordLastModified"),
-    "dovimagedisplay", "dovorder", ("dovportrait", "imageOrientation"),
-]
-EXTRACT_ENTITIES = [("Place", "dovplace", "place")]
+PROPERTY_MAPPINGS = {
+    "dovformat": "format",
+    "dovdefault": "primaryVersion",
+    "dovattributes": "dovattributes",
+    "dovstartdate": "startDate",
+    "dovsdatemod": "startDateModifier",
+    "dovstart": "startDateISOString",
+    "dovenddate": "endDate",
+    "dovedatemod": "endDateModifier",
+    "dovend": "endDateISOString",
+    "dovphysdesc": "physicalDescription",
+    "dovcreator": "resourceCreator",
+    "dovcontrol": "controlCode",
+    "dovreference": "note",
+    "dovnotes": "processingNotes",
+    "dovstatus": "outputStatus",
+    "dovappenddate": "recordAppendDate",
+    "dovlastmodd": "recordLastModified",
+    "dovimagedisplay": "dovimagedisplay",
+    "dovorder": "dovorder",
+    "dovportrait": "imageOrientation",
+}
+EXTRACT_ENTITIES = [Extraction(entity_type="Place", field="dovplace", prop="place")]
 VIEWER_PATH_RE = re.compile(r"image_viewer_paged\.htm\?")
 
 def export_dobjectversions(rows: list[DObjectVersion]) -> list[dict]:

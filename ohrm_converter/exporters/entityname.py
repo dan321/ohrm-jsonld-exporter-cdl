@@ -1,16 +1,20 @@
 """EntityName exporter."""
 from __future__ import annotations
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import EntityName
 
-PROPERTY_MAPPINGS = [
-    ("enstartdate", "startDate"), ("ensdatemod", "dateModifier"),
-    ("enstart", "startDateISOString"), ("enenddate", "endDate"),
-    ("enedatemod", "endDateModifier"), ("enend", "endDateISOString"),
-    ("endatequal", "dateQualifier"), ("ennote", "processingNotes"),
-]
-EXTRACT_ENTITIES = [("Place", "enplace", "place")]
+PROPERTY_MAPPINGS = {
+    "enstartdate": "startDate",
+    "ensdatemod": "dateModifier",
+    "enstart": "startDateISOString",
+    "enenddate": "endDate",
+    "enedatemod": "endDateModifier",
+    "enend": "endDateISOString",
+    "endatequal": "dateQualifier",
+    "ennote": "processingNotes",
+}
+EXTRACT_ENTITIES = [Extraction(entity_type="Place", field="enplace", prop="place")]
 
 def export_entitynames(rows: list[EntityName]) -> list[dict]:
     results: list[dict] = []

@@ -5,14 +5,19 @@ from urllib.parse import quote
 from ohrm_converter.exporters.base import map_properties
 from ohrm_converter.models import RelatedResource
 
-PROPERTY_MAPPINGS = [
-    ("rrstartdate", "startDate"), ("rrsdatemod", "startDateModifier"),
-    ("rrstart", "startDateISOString"), ("rrenddate", "endDate"),
-    ("rredatemod", "endDateModifier"), ("rrend", "endDateISOString"),
-    ("rrdatequal", "dateQualifier"), ("rrnote", "processingNotes"),
-    ("rrrating", "relationshipStrength"), ("rrappenddate", "recordAppendDate"),
-    ("rrlastmodd", "recordLastModified"),
-]
+PROPERTY_MAPPINGS = {
+    "rrstartdate": "startDate",
+    "rrsdatemod": "startDateModifier",
+    "rrstart": "startDateISOString",
+    "rrenddate": "endDate",
+    "rredatemod": "endDateModifier",
+    "rrend": "endDateISOString",
+    "rrdatequal": "dateQualifier",
+    "rrnote": "processingNotes",
+    "rrrating": "relationshipStrength",
+    "rrappenddate": "recordAppendDate",
+    "rrlastmodd": "recordLastModified",
+}
 
 def export_relatedresources(rows: list[RelatedResource]) -> list[dict]:
     results: list[dict] = []

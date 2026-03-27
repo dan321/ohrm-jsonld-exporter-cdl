@@ -1,18 +1,24 @@
 """RelatedEntity exporter."""
 from __future__ import annotations
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import RelatedEntity
 
-PROPERTY_MAPPINGS = [
-    ("restartdate", "startDate"), ("resdatemod", "startDateModifier"),
-    ("restart", "startDateISOString"), ("reenddate", "endDate"),
-    ("reedatemod", "endDateModifer"), ("reend", "endDateISOString"),
-    ("redatequal", "dateQualifier"), ("renote", "processingNotes"),
-    ("rerating", "relationshipStrength"), ("reappenddate", "recordAppendDate"),
-    ("relastmodd", "recordLastModified"), "reorder",
-]
-EXTRACT_ENTITIES = [("Person", "reprepared", "preparedBy")]
+PROPERTY_MAPPINGS = {
+    "restartdate": "startDate",
+    "resdatemod": "startDateModifier",
+    "restart": "startDateISOString",
+    "reenddate": "endDate",
+    "reedatemod": "endDateModifer",
+    "reend": "endDateISOString",
+    "redatequal": "dateQualifier",
+    "renote": "processingNotes",
+    "rerating": "relationshipStrength",
+    "reappenddate": "recordAppendDate",
+    "relastmodd": "recordLastModified",
+    "reorder": "reorder",
+}
+EXTRACT_ENTITIES = [Extraction(entity_type="Person", field="reprepared", prop="preparedBy")]
 
 def export_relatedentities(rows: list[RelatedEntity]) -> list[dict]:
     results: list[dict] = []

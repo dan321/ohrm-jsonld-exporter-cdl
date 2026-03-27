@@ -4,14 +4,20 @@ from urllib.parse import quote
 from ohrm_converter.exporters.base import map_properties
 from ohrm_converter.models import Function
 
-PROPERTY_MAPPINGS = [
-    ("fstartdate", "startDate"), ("fsdatemod", "dateModifier"),
-    ("fstart", "startDateISOString"), ("fenddate", "endDate"),
-    ("fedatemod", "dateModifier"), ("fend", "endDateISOString"),
-    ("fdatequal", "dateQualifier"), "fapplies",
-    ("fappenddate", "recordAppendDate"), ("flastmodd", "recordLastModified"),
-    ("fnote", "processingNotes"), "fparent",
-]
+PROPERTY_MAPPINGS = {
+    "fstartdate": "startDate",
+    "fsdatemod": "dateModifier",
+    "fstart": "startDateISOString",
+    "fenddate": "endDate",
+    "fedatemod": "dateModifier",
+    "fend": "endDateISOString",
+    "fdatequal": "dateQualifier",
+    "fapplies": "fapplies",
+    "fappenddate": "recordAppendDate",
+    "flastmodd": "recordLastModified",
+    "fnote": "processingNotes",
+    "fparent": "fparent",
+}
 
 def export_functions(rows: list[Function]) -> list[dict]:
     results: list[dict] = []

@@ -2,22 +2,44 @@
 from __future__ import annotations
 import re
 from urllib.parse import quote
-from ohrm_converter.exporters.base import extract_entities_from_row, map_properties
+from ohrm_converter.exporters.base import Extraction, extract_entities_from_row, map_properties
 from ohrm_converter.models import PubResource
 
-PROPERTY_MAPPINGS = [
-    "online", "author", ("x_year", "publicationYear"),
-    ("secondaryauthor", "secondaryAuthor"), ("secondarytitle", "secondaryTitle"),
-    "publisher", "volume", ("numberofvolumes", "numberOfVolumes"), "number",
-    ("pagenos", "numberOfPages"), "edition", ("x_date", "publicationDate"),
-    "isbn_issn", ("source", "referenceSource"), "abstract", "notes",
-    "classification", "url", ("urltype", "urlType"), ("urldate", "dateAccessed"),
-    "format", ("x_language", "contentLanguage"), "contains",
-    ("pubappenddate", "recordAppendDate"), ("publastmodd", "recordLastModified"),
-    ("descriptionofwork", "descriptionOfWork"), ("catid", "catalogueId"),
-    ("processing", "processingNotes"), ("status", "outputStatus"),
+PROPERTY_MAPPINGS = {
+    "online": "online",
+    "author": "author",
+    "x_year": "publicationYear",
+    "secondaryauthor": "secondaryAuthor",
+    "secondarytitle": "secondaryTitle",
+    "publisher": "publisher",
+    "volume": "volume",
+    "numberofvolumes": "numberOfVolumes",
+    "number": "number",
+    "pagenos": "numberOfPages",
+    "edition": "edition",
+    "x_date": "publicationDate",
+    "isbn_issn": "isbn_issn",
+    "source": "referenceSource",
+    "abstract": "abstract",
+    "notes": "notes",
+    "classification": "classification",
+    "url": "url",
+    "urltype": "urlType",
+    "urldate": "dateAccessed",
+    "format": "format",
+    "x_language": "contentLanguage",
+    "contains": "contains",
+    "pubappenddate": "recordAppendDate",
+    "publastmodd": "recordLastModified",
+    "descriptionofwork": "descriptionOfWork",
+    "catid": "catalogueId",
+    "processing": "processingNotes",
+    "status": "outputStatus",
+}
+EXTRACT_ENTITIES = [
+    Extraction(entity_type="Person", field="prepared", prop="preparedBy"),
+    Extraction(entity_type="Place", field="placepublished", prop="place"),
 ]
-EXTRACT_ENTITIES = [("Person", "prepared", "preparedBy"), ("Place", "placepublished", "place")]
 
 def export_pubresources(rows: list[PubResource]) -> list[dict]:
     results: list[dict] = []

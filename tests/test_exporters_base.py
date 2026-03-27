@@ -6,25 +6,25 @@ class TestMapProperties:
     def test_maps_string_field_same_name(self):
         row = Entity(eid="E001", epub=1)
         entity: dict = {}
-        map_properties(row, entity, ["epub"])
+        map_properties(row, entity, {"epub": "epub"})
         assert entity["epub"] == 1
 
     def test_maps_renamed_field(self):
         row = Entity(eid="E001", ecountrycode="AU")
         entity: dict = {}
-        map_properties(row, entity, [("ecountrycode", "countryCode")])
+        map_properties(row, entity, {"ecountrycode": "countryCode"})
         assert entity["countryCode"] == "AU"
 
     def test_skips_none_values(self):
         row = Entity(eid="E001")
         entity: dict = {}
-        map_properties(row, entity, [("ecountrycode", "countryCode")])
+        map_properties(row, entity, {"ecountrycode": "countryCode"})
         assert "countryCode" not in entity
 
     def test_skips_falsy_values(self):
         row = Entity(eid="E001", ecountrycode="")
         entity: dict = {}
-        map_properties(row, entity, [("ecountrycode", "countryCode")])
+        map_properties(row, entity, {"ecountrycode": "countryCode"})
         assert "countryCode" not in entity
 
 class TestExtractEntity:
