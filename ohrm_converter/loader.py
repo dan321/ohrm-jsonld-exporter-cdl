@@ -49,12 +49,18 @@ def clean_sql(sql: str) -> str:
             inner = m.group(1)
             # Convert escaped single quotes to SQLite doubled quotes
             inner = inner.replace("\\'", "''")
+            # Protect literal double-backslash (\\) before handling escapes.
+            # In PostgreSQL E-strings, \\\\ is a literal backslash.
+            _PLACEHOLDER = "\x00"
+            inner = inner.replace("\\\\", _PLACEHOLDER)
             # Convert recognised escape sequences to actual characters
             inner = inner.replace("\\n", "\n")
             inner = inner.replace("\\r", "\r")
             inner = inner.replace("\\t", "\t")
-            # Strip remaining backslash escapes
+            # Strip remaining backslash escapes (e.g. \- → -)
             inner = re.sub(r"\\(.)", r"\1", inner)
+            # Restore literal backslashes
+            inner = inner.replace(_PLACEHOLDER, "\\")
             return "'" + inner + "'"
 
         line = re.sub(r"E'((?:[^'\\]|\\.)*?)'", _unescape_pg_string, line)

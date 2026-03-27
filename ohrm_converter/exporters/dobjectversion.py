@@ -34,7 +34,7 @@ def export_dobjectversions(rows: list[DObjectVersion]) -> list[dict]:
     results: list[dict] = []
     for row in rows:
         dov_id = row.dov
-        if not dov_id:
+        if not dov_id or not row.doid:
             continue
         parent_type = "File"
         if row.dovtype == "multipage image":
