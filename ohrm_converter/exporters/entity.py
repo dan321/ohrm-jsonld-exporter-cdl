@@ -74,14 +74,14 @@ def export_entities(
         if row.etype:
             entity_type = [v.strip().replace(" ", "_") for v in row.etype.split("-")]
 
-        # Cross-references
+        # Cross-references (use row.eid since we look up by that key)
         also_known_as = [
-            {"@id": f"#{quote(nm.eid)}_alsoKnownAs"}
-            for nm in names_by_eid.get(row.eid, [])
+            {"@id": f"#{quote(row.eid)}_alsoKnownAs"}
+            for _ in names_by_eid.get(row.eid, [])
         ]
         related_events = [
-            {"@id": f"#{quote(ev.eid)}_event"}
-            for ev in events_by_eid.get(row.eid, [])
+            {"@id": f"#{quote(row.eid)}_event"}
+            for _ in events_by_eid.get(row.eid, [])
         ]
 
         entity: dict = {
