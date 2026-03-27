@@ -16,7 +16,7 @@ TABLES = frozenset({
     "arcresource", "dobject", "dobjectversion", "pubresource",
     "function",
     "earrship", "edorship", "efrship", "eprrship", "relatedentity", "relatedresource",
-    "prreprship",
+    "prreprship", "repository",
     "html", "htmlmetadata",
 })
 

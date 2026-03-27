@@ -5,12 +5,12 @@ from ohrm_converter.models.metadata import Html, HtmlMetadata
 from ohrm_converter.models.relationship import (
     EARRship, EDORship, EFRship, EPRRship, PRREPRship, RelatedEntity, RelatedResource,
 )
-from ohrm_converter.models.resource import ArcResource, DObject, DObjectVersion, PubResource
+from ohrm_converter.models.resource import ArcResource, DObject, DObjectVersion, PubResource, Repository
 
 __all__ = [
     "ArcResource", "DObject", "DObjectVersion",
     "EARRship", "EDORship", "EFRship", "EPRRship",
     "Entity", "EntityEvent", "EntityName",
     "Function", "Html", "HtmlMetadata",
-    "PRREPRship", "PubResource", "RelatedEntity", "RelatedResource",
+    "PRREPRship", "PubResource", "RelatedEntity", "RelatedResource", "Repository",
 ]

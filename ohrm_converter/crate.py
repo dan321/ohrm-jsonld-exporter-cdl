@@ -12,7 +12,7 @@ from ohrm_converter.exporters import (
     export_earrships, export_edorships, export_efrships,
     export_entities, export_entityevents, export_entitynames,
     export_eprrships, export_functions,
-    export_prreprships, export_pubresources,
+    export_prreprships, export_pubresources, export_repositories,
     export_relatedentities, export_relatedresources,
 )
 from ohrm_converter.loader import fetch_all
@@ -20,7 +20,7 @@ from ohrm_converter.models import (
     ArcResource, DObject, DObjectVersion,
     EARRship, EDORship, EFRship, EPRRship,
     Entity, EntityEvent, EntityName, Function, Html, HtmlMetadata,
-    PRREPRship, PubResource, RelatedEntity, RelatedResource,
+    PRREPRship, PubResource, RelatedEntity, RelatedResource, Repository,
 )
 
 # Types that get deduplicated across all exporters
@@ -43,6 +43,7 @@ ROOT_DATASET_PROPERTIES = [
     "resourceRelationships",
     "entityPubResourceRelationships",
     "pubResourceRepositoryRelationships",
+    "repositories",
 ]
 
 
@@ -85,6 +86,7 @@ def _run_all_exporters(conn: sqlite3.Connection) -> list[list[dict]]:
     rr_rows = fetch_all(conn, "relatedresource", RelatedResource)
     eprr_rows = fetch_all(conn, "eprrship", EPRRship)
     prrep_rows = fetch_all(conn, "prreprship", PRREPRship)
+    repo_rows = fetch_all(conn, "repository", Repository)
 
     return [
         export_arcresources(arc_rows),
@@ -102,6 +104,7 @@ def _run_all_exporters(conn: sqlite3.Connection) -> list[list[dict]]:
         export_relatedresources(rr_rows),
         export_eprrships(eprr_rows),
         export_prreprships(prrep_rows),
+        export_repositories(repo_rows),
     ]
 
 

@@ -12,6 +12,7 @@ from ohrm_converter.exporters.entityevent import export_entityevents
 from ohrm_converter.exporters.entityname import export_entitynames
 from ohrm_converter.exporters.function import export_functions
 from ohrm_converter.exporters.prreprship import export_prreprships
+from ohrm_converter.exporters.repository import export_repositories
 from ohrm_converter.exporters.pubresource import export_pubresources
 from ohrm_converter.exporters.relatedentity import export_relatedentities
 from ohrm_converter.exporters.relatedresource import export_relatedresources
@@ -21,6 +22,6 @@ __all__ = [
     "export_earrships", "export_edorships", "export_efrships",
     "export_entities", "export_entityevents", "export_entitynames",
     "export_eprrships", "export_functions",
-    "export_prreprships", "export_pubresources",
+    "export_prreprships", "export_pubresources", "export_repositories",
     "export_relatedentities", "export_relatedresources",
 ]

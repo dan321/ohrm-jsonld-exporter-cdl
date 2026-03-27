@@ -73,7 +73,7 @@ The converter exports all core data and relationship tables from the OHRM schema
 | Contacts | `contact`, `ecrship` | Contact people and entity↔contact links |
 | Categories | `category`, `catership` | Category definitions and entity↔category links |
 | Sponsorship | `sponsors`, `spons_entity`, `spons_entity_updates`, `spons_type` | Funding and sponsorship data |
-| System config | `ohrmsystem`, `repository` | OHRM system metadata and repository definitions |
+| System config | `ohrmsystem` | OHRM system metadata |
 | Features | `onthisday`, `dataentryprotocol` | Web feature config and data entry workflow |
 
 If any of these tables contain data relevant to your use case, they can be added as new exporters following the existing pattern in `ohrm_converter/exporters/`.

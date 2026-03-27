@@ -2,6 +2,15 @@
 from pydantic import BaseModel
 
 
+class Repository(BaseModel):
+    repid: str
+    rep: str | None = None
+    wurl: str | None = None
+    private: int | None = None
+    repositorytable: int | None = None
+    alpha: str | None = None
+
+
 class ArcResource(BaseModel):
     arcid: str
     repid: str | None = None

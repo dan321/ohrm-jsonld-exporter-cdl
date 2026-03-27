@@ -34,6 +34,7 @@ class TestCli:
             "CREATE TABLE relatedresource (rrno INTEGER NOT NULL);\n"
             "CREATE TABLE eprrship (eid varchar(7), pubid varchar(9));\n"
             "CREATE TABLE prreprship (pubid varchar(9), repid varchar(20));\n"
+            "CREATE TABLE repository (repid varchar(255));\n"
         )
         (sql_dir / "updateTEST.sql").write_text(
             "INSERT INTO entity (eid, ename) VALUES ('E001', 'Test Entity');\n"
