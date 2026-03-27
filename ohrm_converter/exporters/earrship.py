@@ -9,7 +9,7 @@ PROPERTY_MAPPINGS = {
     "earsdatemod": "startDateModifier",
     "earstart": "startDateISOString",
     "earenddate": "endDate",
-    "earedatemod": "endDateModifer",
+    "earedatemod": "endDateModifier",
     "earend": "endDateISOString",
     "earcitation": "citation",
     "earappenddate": "recordAppendDate",

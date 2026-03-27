@@ -9,7 +9,7 @@ PROPERTY_MAPPINGS = {
     "edosdatemod": "startDateModifier",
     "edostart": "startDateISOString",
     "edoenddate": "endDate",
-    "edoedatemod": "endDateModifer",
+    "edoedatemod": "endDateModifier",
     "edoend": "endDateISOString",
     "edocitation": "citation",
     "edoappenddate": "recordAppendDate",

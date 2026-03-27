@@ -26,7 +26,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from ohrm_converter.loader import (
     TABLES,
     _derive_ohrm_name,
-    _find_ohrm_subdir,
     load_ohrm,
 )
 
@@ -184,8 +183,7 @@ def main() -> int:
 
     psql = args.psql or _find_psql()
     ohrm_path = args.ohrm_path.expanduser().resolve()
-    ohrm_name = _derive_ohrm_name(ohrm_path)
-    sql_dir = _find_ohrm_subdir(ohrm_path) / "web" / "sql"
+    ohrm_name, sql_dir = _derive_ohrm_name(ohrm_path)
     init_script = _find_init_script(sql_dir, ohrm_name)
     db_name = f"ohrm_validate_{ohrm_name.lower()}"
 

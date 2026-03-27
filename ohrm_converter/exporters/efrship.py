@@ -10,7 +10,7 @@ PROPERTY_MAPPINGS = {
     "efsdatemod": "startDateModifier",
     "efstart": "startDateISOString",
     "efenddate": "endDate",
-    "efedatemod": "endDateModifer",
+    "efedatemod": "endDateModifier",
     "efend": "endDateISOString",
     "efcitation": "citation",
     "efnote": "processingNotes",

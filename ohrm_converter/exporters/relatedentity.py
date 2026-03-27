@@ -9,7 +9,7 @@ PROPERTY_MAPPINGS = {
     "resdatemod": "startDateModifier",
     "restart": "startDateISOString",
     "reenddate": "endDate",
-    "reedatemod": "endDateModifer",
+    "reedatemod": "endDateModifier",
     "reend": "endDateISOString",
     "redatequal": "dateQualifier",
     "renote": "processingNotes",

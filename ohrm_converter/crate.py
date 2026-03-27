@@ -108,6 +108,10 @@ def _run_all_exporters(conn: sqlite3.Connection) -> list[list[dict]]:
     ]
 
 
+def _ensure_list(value: object) -> list:
+    return value if isinstance(value, list) else [value]
+
+
 def _dedup_by_id(entities: list[dict]) -> list[dict]:
     """Deduplicate entities by @id, keeping first occurrence."""
     seen: set[str] = set()
@@ -159,11 +163,7 @@ def build_crate(conn: sqlite3.Connection, output_path: Path) -> None:
         main_entities: list[str] = []
 
         for entity in exporter_entities:
-            entity_type = entity.get("@type", [])
-            if isinstance(entity_type, str):
-                entity_type_list = [entity_type]
-            else:
-                entity_type_list = entity_type
+            entity_type_list = _ensure_list(entity.get("@type", []))
 
             # Check if this is an extracted entity type (single-type like "Person")
             if (
@@ -196,9 +196,7 @@ def build_crate(conn: sqlite3.Connection, output_path: Path) -> None:
     # Link relationships bidirectionally
     for entity in list(crate.get_entities()):
         props = dict(entity.properties())
-        entity_type = props.get("@type", [])
-        if isinstance(entity_type, str):
-            entity_type = [entity_type]
+        entity_type = _ensure_list(props.get("@type", []))
         if "Relationship" not in entity_type:
             continue
 
@@ -232,16 +230,12 @@ def build_crate(conn: sqlite3.Connection, output_path: Path) -> None:
 
         # Add back-references
         src_props = dict(src_entity.properties())
-        src_source_of = src_props.get("sourceOf", [])
-        if not isinstance(src_source_of, list):
-            src_source_of = [src_source_of]
+        src_source_of = _ensure_list(src_props.get("sourceOf", []))
         src_source_of.append({"@id": entity.id})
         src_entity["sourceOf"] = src_source_of
 
         tgt_props = dict(tgt_entity.properties())
-        tgt_target_of = tgt_props.get("targetOf", [])
-        if not isinstance(tgt_target_of, list):
-            tgt_target_of = [tgt_target_of]
+        tgt_target_of = _ensure_list(tgt_props.get("targetOf", []))
         tgt_target_of.append({"@id": entity.id})
         tgt_entity["targetOf"] = tgt_target_of
 

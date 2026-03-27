@@ -153,21 +153,19 @@ def _find_ohrm_subdir(ohrm_path: Path) -> Path:
     raise FileNotFoundError(f"No 'ohrm' subdirectory found in {ohrm_path}")
 
 
-def _derive_ohrm_name(ohrm_path: Path) -> str:
-    """Derive the OHRM name from the init script filename."""
+def _derive_ohrm_name(ohrm_path: Path) -> tuple[str, Path]:
+    """Derive the OHRM name and sql_dir from the init script filename."""
     sql_dir = _find_ohrm_subdir(ohrm_path) / "web" / "sql"
     for f in sql_dir.iterdir():
         if f.name.lower().startswith("initialise") and f.name.endswith(".sql"):
-            return f.stem[len("initialise"):]
+            return f.stem[len("initialise"):], sql_dir
     raise FileNotFoundError(f"No initialise*.sql found in {sql_dir}")
 
 
 @contextmanager
 def load_ohrm(ohrm_path: Path) -> Generator[sqlite3.Connection, None, None]:
     """Load an OHRM SQL dump into a temporary SQLite database."""
-    ohrm_name = _derive_ohrm_name(ohrm_path)
-    ohrm_subdir = _find_ohrm_subdir(ohrm_path)
-    sql_dir = ohrm_subdir / "web" / "sql"
+    ohrm_name, sql_dir = _derive_ohrm_name(ohrm_path)
     sql_files = resolve_sql_files(sql_dir, ohrm_name)
 
     tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
