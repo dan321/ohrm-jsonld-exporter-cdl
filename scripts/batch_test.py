@@ -96,8 +96,10 @@ def unzip_crates(downloads_dir: Path, work_dir: Path) -> list[Path]:
 
 def run_converter(work_dir: Path, output_dir: Path) -> dict[str, str | None]:
     """Run ohrm-converter on the work directory. Returns {name: error_or_none}."""
+    venv_converter = Path(__file__).parent.parent / ".venv" / "bin" / "ohrm-converter"
+    cmd = str(venv_converter) if venv_converter.exists() else "ohrm-converter"
     result = subprocess.run(
-        ["ohrm-converter", str(work_dir), "-o", str(output_dir)],
+        [cmd, str(work_dir), "-o", str(output_dir)],
         capture_output=True,
         text=True,
     )

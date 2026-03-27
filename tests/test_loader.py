@@ -53,6 +53,11 @@ class TestCleanSql:
         result = clean_sql(sql)
         assert 'DROP TABLE IF EXISTS "entity";' in result
 
+    def test_adds_if_not_exists_to_create_table(self):
+        sql = "CREATE TABLE entity (eid varchar(7));"
+        result = clean_sql(sql)
+        assert "CREATE TABLE IF NOT EXISTS entity" in result
+
     def test_preserves_normal_sql(self):
         sql = "INSERT INTO entity (eid, ename) VALUES ('E001', 'Test');"
         result = clean_sql(sql)

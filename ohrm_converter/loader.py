@@ -23,8 +23,11 @@ TABLES = frozenset({
 
 def clean_sql(sql: str) -> str:
     """Clean PostgreSQL-specific syntax for SQLite compatibility."""
+    # Use split('\n') not splitlines(): the latter splits on Unicode line
+    # separators (e.g. \u2028) which can appear inside string literals and
+    # would break multi-line E-strings.
     lines = []
-    for line in sql.splitlines():
+    for line in sql.split('\n'):
         stripped = line.strip()
 
         # Skip \i include directives (resolved separately)
@@ -37,48 +40,61 @@ def clean_sql(sql: str) -> str:
             lines.append(f'DROP TABLE IF EXISTS "{table_name}";')
             continue
 
-        # Quote table names with special characters (hyphens etc.) in SQL statements
-        line = re.sub(
-            r"((?:CREATE\s+TABLE|INSERT\s+INTO)\s+)([A-Za-z0-9_-]+[^A-Za-z0-9_\s(][A-Za-z0-9_-]*)",
-            lambda m: f'{m.group(1)}"{m.group(2)}"',
-            line,
-            flags=re.IGNORECASE,
-        )
-
-        # Type normalisation
-        line = re.sub(r"\bint[248]\b", "INTEGER", line, flags=re.IGNORECASE)
-        line = re.sub(r"\bfloat8\b", "REAL", line, flags=re.IGNORECASE)
-        line = re.sub(r"\bboolean\b", "INTEGER", line, flags=re.IGNORECASE)
-
-        # E'escaped\-strings' -> 'unescaped-strings'
-        # Escaped single quotes (\') become doubled quotes ('') for SQLite,
-        # all other backslash sequences are simply unescaped.
-        def _unescape_pg_string(m: re.Match) -> str:
-            inner = m.group(1)
-            # Convert escaped single quotes to SQLite doubled quotes
-            inner = inner.replace("\\'", "''")
-            # Protect literal double-backslash (\\) before handling escapes.
-            # In PostgreSQL E-strings, \\\\ is a literal backslash.
-            _PLACEHOLDER = "\x00"
-            inner = inner.replace("\\\\", _PLACEHOLDER)
-            # Convert recognised escape sequences to actual characters
-            inner = inner.replace("\\n", "\n")
-            inner = inner.replace("\\r", "\r")
-            inner = inner.replace("\\t", "\t")
-            # Strip remaining backslash escapes (e.g. \- → -)
-            inner = re.sub(r"\\(.)", r"\1", inner)
-            # Restore literal backslashes
-            inner = inner.replace(_PLACEHOLDER, "\\")
-            return "'" + inner + "'"
-
-        line = re.sub(r"E'((?:[^'\\]|\\.)*?)'", _unescape_pg_string, line)
-
-        # Boolean string values -> integers
-        line = line.replace("'True'", "1").replace("'False'", "0")
-
         lines.append(line)
 
-    return "\n".join(lines)
+    sql = "\n".join(lines)
+
+    # CREATE TABLE -> CREATE TABLE IF NOT EXISTS (some dumps create the same
+    # table in both the schema file and each data file, e.g. DUMMY table)
+    sql = re.sub(
+        r"CREATE\s+TABLE\s+(?!IF\s+NOT\s+EXISTS\b)",
+        "CREATE TABLE IF NOT EXISTS ",
+        sql,
+        flags=re.IGNORECASE,
+    )
+
+    # Quote table names with special characters (hyphens etc.) in SQL statements
+    sql = re.sub(
+        r"((?:CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS|INSERT\s+INTO)\s+)([A-Za-z0-9_-]+[^A-Za-z0-9_\s(][A-Za-z0-9_-]*)",
+        lambda m: f'{m.group(1)}"{m.group(2)}"',
+        sql,
+        flags=re.IGNORECASE,
+    )
+
+    # Type normalisation
+    sql = re.sub(r"\bint[248]\b", "INTEGER", sql, flags=re.IGNORECASE)
+    sql = re.sub(r"\bfloat8\b", "REAL", sql, flags=re.IGNORECASE)
+    sql = re.sub(r"\bboolean\b", "INTEGER", sql, flags=re.IGNORECASE)
+
+    # E'escaped\-strings' -> 'unescaped-strings'
+    # Escaped single quotes (\') become doubled quotes ('') for SQLite,
+    # all other backslash sequences are simply unescaped.
+    # re.DOTALL so the pattern matches E-strings containing real newlines
+    # or \u2028 Unicode line separators embedded in string values.
+    def _unescape_pg_string(m: re.Match) -> str:
+        inner = m.group(1)
+        # Convert escaped single quotes to SQLite doubled quotes
+        inner = inner.replace("\\'", "''")
+        # Protect literal double-backslash (\\) before handling escapes.
+        # In PostgreSQL E-strings, \\\\ is a literal backslash.
+        _PLACEHOLDER = "\x00"
+        inner = inner.replace("\\\\", _PLACEHOLDER)
+        # Convert recognised escape sequences to actual characters
+        inner = inner.replace("\\n", "\n")
+        inner = inner.replace("\\r", "\r")
+        inner = inner.replace("\\t", "\t")
+        # Strip remaining backslash escapes (e.g. \- → -)
+        inner = re.sub(r"\\(.)", r"\1", inner)
+        # Restore literal backslashes
+        inner = inner.replace(_PLACEHOLDER, "\\")
+        return "'" + inner + "'"
+
+    sql = re.sub(r"E'((?:[^'\\]|\\.)*?)'", _unescape_pg_string, sql, flags=re.DOTALL)
+
+    # Boolean string values -> integers
+    sql = sql.replace("'True'", "1").replace("'False'", "0")
+
+    return sql
 
 
 def resolve_sql_files(sql_dir: Path, ohrm_name: str) -> list[Path]:
@@ -107,7 +123,9 @@ def _collect_includes(
     seen: set[Path],
 ) -> None:
     """Recursively collect SQL files referenced by \\i directives."""
-    for line in script.read_text().splitlines():
+    # utf-8-sig strips the UTF-8 BOM (\ufeff) that some OHRM files include,
+    # which would otherwise prevent \i lines from being recognised.
+    for line in script.read_text(encoding="utf-8-sig", errors="replace").splitlines():
         line = line.strip()
         if line.startswith("\\i "):
             filename = line[3:].strip()
@@ -116,7 +134,7 @@ def _collect_includes(
                 seen.add(sql_file)
                 # If the included file itself contains \i directives,
                 # resolve those recursively instead of adding it directly
-                text = sql_file.read_text()
+                text = sql_file.read_text(encoding="utf-8-sig", errors="replace")
                 has_includes = any(
                     l.strip().startswith("\\i ")
                     for l in text.splitlines()
@@ -161,7 +179,7 @@ def load_ohrm(ohrm_path: Path) -> Generator[sqlite3.Connection, None, None]:
         conn.row_factory = sqlite3.Row
 
         for sql_file in sql_files:
-            raw_sql = sql_file.read_text(encoding="utf-8", errors="replace")
+            raw_sql = sql_file.read_text(encoding="utf-8-sig", errors="replace")
             cleaned = clean_sql(raw_sql)
             conn.executescript(cleaned)
 
