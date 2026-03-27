@@ -1,11 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
-name = "ohrm-exporter"
-version = "0.0.1"
-description = "Batch convert OHRM databases to RO-Crate JSON-LD and upload to Figshare"
+name = "ohrm-converter"
+version = "0.1.0"
+description = "Convert OHRM database dumps to RO-Crate JSON-LD"
 license = "GPL-3.0-only"
 requires-python = ">=3.12"
 dependencies = [
-    "docker~=7.0",
-    "pyyaml~=6.0",
-    "requests~=2.31",
+    "typer>=0.15",
+    "pydantic>=2.10",
+    "rocrate>=0.14",
 ]
+
+[project.optional-dependencies]
+figshare = ["requests~=2.31", "pyyaml~=6.0", "docker~=7.0"]
+dev = ["pytest>=9.0"]
+
+[project.scripts]
+ohrm-converter = "ohrm_converter.cli:app"
