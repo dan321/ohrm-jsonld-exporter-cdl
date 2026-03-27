@@ -46,9 +46,13 @@ def clean_sql(sql: str) -> str:
         # all other backslash sequences are simply unescaped.
         def _unescape_pg_string(m: re.Match) -> str:
             inner = m.group(1)
-            # First, convert escaped single quotes to SQLite doubled quotes
+            # Convert escaped single quotes to SQLite doubled quotes
             inner = inner.replace("\\'", "''")
-            # Then strip remaining backslash escapes
+            # Convert recognised escape sequences to actual characters
+            inner = inner.replace("\\n", "\n")
+            inner = inner.replace("\\r", "\r")
+            inner = inner.replace("\\t", "\t")
+            # Strip remaining backslash escapes
             inner = re.sub(r"\\(.)", r"\1", inner)
             return "'" + inner + "'"
 

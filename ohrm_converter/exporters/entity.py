@@ -89,12 +89,9 @@ def export_entities(
             "@type": entity_type,
             "identifier": row.eid,
             "name": row.ename,
+            "alsoKnownAs": also_known_as,
+            "relatedEvents": related_events,
         }
-
-        if also_known_as:
-            entity["alsoKnownAs"] = also_known_as
-        if related_events:
-            entity["relatedEvents"] = related_events
 
         map_properties(row, entity, PROPERTY_MAPPINGS)
         extract_entities_from_row(row, entity, EXTRACT_ENTITIES, results)

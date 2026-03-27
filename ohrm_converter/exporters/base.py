@@ -20,11 +20,11 @@ def map_properties(
     """Copy model fields to JSON-LD properties.
 
     mappings: dict of {db_field: jsonld_property}
-    Matches Node.js behaviour: only sets property if the value is truthy.
+    Skips None and empty strings, but preserves zero and other falsy values.
     """
     for field, prop in mappings.items():
         value = getattr(row, field, None)
-        if value:
+        if value is not None and value != "":
             entity[prop] = value
 
 

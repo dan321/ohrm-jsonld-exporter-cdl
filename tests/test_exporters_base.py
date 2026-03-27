@@ -21,11 +21,17 @@ class TestMapProperties:
         map_properties(row, entity, {"ecountrycode": "countryCode"})
         assert "countryCode" not in entity
 
-    def test_skips_falsy_values(self):
+    def test_skips_empty_strings(self):
         row = Entity(eid="E001", ecountrycode="")
         entity: dict = {}
         map_properties(row, entity, {"ecountrycode": "countryCode"})
         assert "countryCode" not in entity
+
+    def test_preserves_zero_values(self):
+        row = Entity(eid="E001", erating=0.0)
+        entity: dict = {}
+        map_properties(row, entity, {"erating": "rating"})
+        assert entity["rating"] == 0.0
 
 class TestExtractEntity:
     def test_creates_stub_entity(self):
