@@ -145,7 +145,7 @@ def build_crate(conn: sqlite3.Connection, output_path: Path) -> None:
 
     for idx, exporter_entities in enumerate(exporter_results):
         prop_name = ROOT_DATASET_PROPERTIES[idx]
-        main_entities: list[dict] = []
+        main_entities: list[str] = []
 
         for entity in exporter_entities:
             entity_type = entity.get("@type", [])
