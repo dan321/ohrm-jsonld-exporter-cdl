@@ -51,7 +51,7 @@ class TestCleanSql:
     def test_handles_drop_table(self):
         sql = "DROP TABLE entity;"
         result = clean_sql(sql)
-        assert "DROP TABLE IF EXISTS entity;" in result
+        assert 'DROP TABLE IF EXISTS "entity";' in result
 
     def test_preserves_normal_sql(self):
         sql = "INSERT INTO entity (eid, ename) VALUES ('E001', 'Test');"

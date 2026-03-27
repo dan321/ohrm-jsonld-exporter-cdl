@@ -31,11 +31,19 @@ def clean_sql(sql: str) -> str:
         if stripped.startswith("\\i "):
             continue
 
-        # DROP TABLE -> DROP TABLE IF EXISTS
+        # DROP TABLE -> DROP TABLE IF EXISTS (quote name for safety)
         if stripped.upper().startswith("DROP TABLE"):
             table_name = stripped.split()[-1].rstrip(";")
-            lines.append(f"DROP TABLE IF EXISTS {table_name};")
+            lines.append(f'DROP TABLE IF EXISTS "{table_name}";')
             continue
+
+        # Quote table names with special characters (hyphens etc.) in SQL statements
+        line = re.sub(
+            r"((?:CREATE\s+TABLE|INSERT\s+INTO)\s+)([A-Za-z0-9_-]+[^A-Za-z0-9_\s(][A-Za-z0-9_-]*)",
+            lambda m: f'{m.group(1)}"{m.group(2)}"',
+            line,
+            flags=re.IGNORECASE,
+        )
 
         # Type normalisation
         line = re.sub(r"\bint[248]\b", "INTEGER", line, flags=re.IGNORECASE)
