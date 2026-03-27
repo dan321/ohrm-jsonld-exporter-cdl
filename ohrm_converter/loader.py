@@ -9,6 +9,16 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
 
+from pydantic import BaseModel as PydanticBaseModel
+
+TABLES = frozenset({
+    "entity", "entityevent", "entityname",
+    "arcresource", "dobject", "dobjectversion", "pubresource",
+    "function",
+    "earrship", "edorship", "efrship", "relatedentity", "relatedresource",
+    "html", "htmlmetadata",
+})
+
 
 def clean_sql(sql: str) -> str:
     """Clean PostgreSQL-specific syntax for SQLite compatibility."""
@@ -127,8 +137,8 @@ def load_ohrm(ohrm_path: Path) -> Generator[sqlite3.Connection, None, None]:
     db_path = Path(tmp.name)
     tmp.close()
 
+    conn = sqlite3.connect(str(db_path))
     try:
-        conn = sqlite3.connect(str(db_path))
         conn.row_factory = sqlite3.Row
 
         for sql_file in sql_files:
@@ -141,3 +151,13 @@ def load_ohrm(ohrm_path: Path) -> Generator[sqlite3.Connection, None, None]:
     finally:
         conn.close()
         db_path.unlink(missing_ok=True)
+
+
+def fetch_all[T: PydanticBaseModel](
+    conn: sqlite3.Connection, table: str, model: type[T],
+) -> list[T]:
+    """Fetch all rows from a table and return as Pydantic model instances."""
+    if table not in TABLES:
+        raise ValueError(f"Unknown table: {table}")
+    cursor = conn.execute(f"SELECT * FROM {table}")  # noqa: S608
+    return [model(**dict(row)) for row in cursor.fetchall()]

@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from ohrm_converter.loader import clean_sql, load_ohrm, resolve_sql_files
+from ohrm_converter.loader import clean_sql, fetch_all, load_ohrm, resolve_sql_files
+from ohrm_converter.models import Entity
 
 
 class TestCleanSql:
@@ -130,3 +131,32 @@ class TestLoadUlss:
                 cursor = conn.execute(f"SELECT COUNT(*) as cnt FROM {table}")
                 count = cursor.fetchone()["cnt"]
                 assert count > 0, f"Table {table} is empty"
+
+
+class TestFetchAll:
+    def test_fetches_and_maps_to_model(self, tmp_path):
+        ohrm_dir = tmp_path / "TEST"
+        sql_dir = ohrm_dir / "ohrm" / "web" / "sql"
+        sql_dir.mkdir(parents=True)
+        (sql_dir / "createOHRM.sql").write_text(
+            "CREATE TABLE entity (eid varchar(7) NOT NULL, ename varchar(255));"
+        )
+        (sql_dir / "updateTEST.sql").write_text(
+            "INSERT INTO entity (eid, ename) VALUES ('E001', 'Test Entity');"
+        )
+        (sql_dir / "initialiseTEST.sql").write_text(
+            "\\i createOHRM.sql\n\\i updateTEST.sql\n"
+        )
+        with load_ohrm(ohrm_dir) as conn:
+            entities = fetch_all(conn, "entity", Entity)
+            assert len(entities) == 1
+            assert entities[0].eid == "E001"
+            assert entities[0].ename == "Test Entity"
+            assert entities[0].etype is None
+
+    def test_rejects_unknown_table(self, tmp_path):
+        import sqlite3 as _sqlite3
+        conn = _sqlite3.connect(":memory:")
+        with pytest.raises(ValueError, match="Unknown table"):
+            fetch_all(conn, "evil_table", Entity)
+        conn.close()
