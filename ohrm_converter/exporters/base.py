@@ -28,10 +28,14 @@ def map_properties(
             entity[prop] = value
 
 
+# Match Node.js encodeURIComponent which does not encode: ! ' ( ) * ~
+_URI_SAFE = "!'()*~"
+
+
 def extract_entity(entity_type: str, value: str) -> dict:
     """Create a stub entity for Person, Place, State, Country, Nationality."""
     return {
-        "@id": f"#{quote(str(value))}",
+        "@id": f"#{quote(str(value), safe=_URI_SAFE)}",
         "@type": entity_type,
         "name": value,
     }
