@@ -17,18 +17,36 @@ uv sync
 Point the tool at a directory containing one or more OHRM folders:
 
 ```bash
+# Metadata only (default)
 ohrm-converter ./path/to/ohrm-collection/ -o output/
+
+# Full crate — copies source files into output alongside the generated metadata
+ohrm-converter ./path/to/ohrm-collection/ -o output/ --full-crate
 ```
 
 Each OHRM folder must contain an `ohrm/` subdirectory with `web/sql/` inside it (the standard OHRM dump structure). The tool discovers all valid OHRM folders in the input directory and converts each one.
 
-Output:
+By default, only `ro-crate-metadata.json` is written per dataset. With `--full-crate`, the entire source folder is copied into the output first, then the freshly generated metadata is written on top (replacing any existing `ro-crate-metadata.json` from the source).
+
+Output (default):
 ```
 output/
 ├── ULSS-ro-crate/
 │   └── ro-crate-metadata.json
 ├── AABR-ro-crate/
 │   └── ro-crate-metadata.json
+└── ...
+```
+
+Output (`--full-crate`):
+```
+output/
+├── ULSS-ro-crate/
+│   ├── ro-crate-metadata.json    ← freshly generated
+│   ├── web/
+│   ├── objects/
+│   ├── data/
+│   └── ...                       ← all source files
 └── ...
 ```
 

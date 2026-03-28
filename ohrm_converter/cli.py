@@ -1,6 +1,7 @@
 """CLI entry point for ohrm-converter."""
 from __future__ import annotations
 from pathlib import Path
+import shutil
 import typer
 from rich.console import Console
 from rich.live import Live
@@ -75,6 +76,11 @@ def main(
         "-o", "--output",
         help="Output directory for RO-Crate metadata files.",
     ),
+    full_crate: bool = typer.Option(
+        False,
+        "--full-crate",
+        help="Copy source files into the output, producing a complete RO-Crate.",
+    ),
 ) -> None:
     """Convert OHRM database dumps to RO-Crate JSON-LD."""
     ohrms = _discover_ohrms(input_dir)
@@ -98,11 +104,14 @@ def main(
             live.update(Spinner("dots", text=label))
 
             try:
+                if full_crate:
+                    shutil.copytree(ohrm_path, output_dir, dirs_exist_ok=True)
                 with load_ohrm(ohrm_path) as conn:
                     build_crate(conn, output_dir)
                 live.update(Text(""))
                 console.print(_status_line("\u2713", "green", idx, total, ohrm_name))
-                results.append((ohrm_name, "ok", str(output_dir / "ro-crate-metadata.json")))
+                output_detail = str(output_dir) if full_crate else str(output_dir / "ro-crate-metadata.json")
+                results.append((ohrm_name, "ok", output_detail))
             except Exception as e:
                 live.update(Text(""))
                 console.print(_status_line("\u2717", "red", idx, total, ohrm_name, f"\u2014 {e}"))

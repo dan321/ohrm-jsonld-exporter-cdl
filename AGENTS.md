@@ -95,7 +95,8 @@ uv run pytest tests/ -v
 | `uv sync` | Install dependencies |
 | `uv sync --extra dev` | Install with dev/test dependencies |
 | `uv sync --extra validate` | Install with psycopg2 for pg_validate |
-| `ohrm-converter <input> -o <output>` | Convert OHRM dumps to RO-Crate JSON-LD |
+| `ohrm-converter <input> -o <output>` | Convert OHRM dumps to RO-Crate JSON-LD (metadata only) |
+| `ohrm-converter <input> -o <output> --full-crate` | Copy source files into output, producing complete RO-Crates |
 | `uv run pytest tests/ -v` | Run full test suite |
 | `python scripts/batch_test.py <downloads/>` | Batch convert and compare against reference output |
 | `python scripts/pg_validate.py <ohrm-path>` | Validate SQLite output against PostgreSQL row-for-row |
