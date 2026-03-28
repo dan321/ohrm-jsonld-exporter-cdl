@@ -1,11 +1,19 @@
 """Tests for CLI."""
 from typer.testing import CliRunner
-from ohrm_converter.cli import app
+from ohrm_converter.cli import app, _progress_label, _status_line
 
 runner = CliRunner()
 
 
 class TestCli:
+    def test_progress_label_pads_counter_width(self):
+        assert _progress_label(1, 10, "TEST-ohrm").plain == "[ 1/10] TEST-ohrm"
+        assert _progress_label(10, 10, "TEST-ohrm").plain == "[10/10] TEST-ohrm"
+
+    def test_status_line_matches_progress_alignment(self):
+        assert _status_line("✓", "green", 1, 10, "TEST-ohrm").plain == "✓ [ 1/10] TEST-ohrm"
+        assert _status_line("✗", "red", 10, 10, "TEST-ohrm", "— boom").plain == "✗ [10/10] TEST-ohrm — boom"
+
     def test_no_ohrms_found(self, tmp_path):
         result = runner.invoke(app, [str(tmp_path), "-o", str(tmp_path / "out")])
         assert result.exit_code == 1
@@ -47,5 +55,5 @@ class TestCli:
         output_dir = tmp_path / "output"
         result = runner.invoke(app, [str(tmp_path / "input"), "-o", str(output_dir)])
         assert result.exit_code == 0
-        assert "Converting TEST-ohrm" in result.output
+        assert "TEST-ohrm" in result.output
         assert (output_dir / "TEST-ohrm" / "ro-crate-metadata.json").exists()
