@@ -53,9 +53,9 @@ def export_dobjectversions(rows: list[DObjectVersion]) -> list[dict]:
             "description": row.dovdescription, "dobject": {"@id": f"#{quote(row.doid)}"},
         }
         if row.arcid:
-            entity["linkedArchivalResource"] = {"@id": row.arcid}
+            entity["linkedArchivalResource"] = {"@id": f"#{quote(row.arcid)}"}
         if row.pubid:
-            entity["linkedPublishedResource"] = {"@id": row.pubid}
+            entity["linkedPublishedResource"] = {"@id": f"#{quote(row.pubid)}"}
         map_properties(row, entity, PROPERTY_MAPPINGS)
         extract_entities_from_row(row, entity, EXTRACT_ENTITIES, results)
         results.append(entity)
