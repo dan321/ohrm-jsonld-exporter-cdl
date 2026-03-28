@@ -55,8 +55,7 @@ ohrm-jsonld-exporter-cdl/
 ├── scripts/
 │   ├── batch_test.py             # Batch converter run + comparison against reference output
 │   └── pg_validate.py            # Row-level validation of SQLite output against PostgreSQL
-├── figshare.py                   # Standalone Figshare upload script (optional)
-└── legacy/                       # Original Node.js implementation (reference only)
+└── legacy/                       # Original Node.js implementation + Figshare upload (reference only)
 ```
 
 ## Module Guide
@@ -66,7 +65,7 @@ ohrm-jsonld-exporter-cdl/
 - **`crate.py`** — Runs all exporters, deduplicates extracted entities, links relationships bidirectionally, writes RO-Crate output
 - **`models/`** — Pydantic BaseModel classes matching the fixed OHRM database schema
 - **`exporters/`** — 13 exporters mapping DB rows to JSON-LD entities via property mappings and entity extraction
-- **`figshare.py`** — Standalone Figshare upload client (not part of the converter package)
+- **`legacy/figshare.py`** — Standalone Figshare upload client (legacy, not part of the converter package)
 
 ## Getting Started
 

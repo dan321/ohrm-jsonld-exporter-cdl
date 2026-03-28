@@ -50,6 +50,8 @@ output/
 └── ...
 ```
 
+**Note:** The tool does not currently generate `ro-crate-preview.html`. This is planned for a future release.
+
 ## How It Works
 
 1. **Load** — Reads the OHRM SQL dump files, cleans PostgreSQL-specific syntax, and loads them into a temporary SQLite database
@@ -77,7 +79,7 @@ uv run pytest tests/ -v
   - `models/` — Pydantic models for the OHRM database schema
   - `exporters/` — 15 per-table exporters (DB rows → JSON-LD entities)
 - `tests/` — pytest test suite
-- `figshare.py` — Standalone Figshare upload script (optional, `uv sync --extra figshare`)
+- `legacy/figshare.py` — Standalone Figshare upload script (legacy)
 - `legacy/` — Original Node.js implementation (reference only)
 
 ## OHRM Tables Coverage
@@ -98,13 +100,13 @@ If any of these tables contain data relevant to your use case, they can be added
 
 ## Figshare Upload (Optional)
 
-The standalone `figshare.py` script can upload converted RO-Crates to Figshare. Install the optional dependencies first:
+The standalone `legacy/figshare.py` script can upload converted RO-Crates to Figshare. Install the optional dependencies first:
 
 ```bash
 uv sync --extra figshare
 ```
 
-See `figshare.py` for usage details.
+See `legacy/figshare.py` for usage details.
 
 ## Licence
 
