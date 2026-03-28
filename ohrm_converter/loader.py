@@ -122,7 +122,12 @@ def _collect_includes(
     files: list[Path],
     seen: set[Path],
 ) -> None:
-    """Recursively collect SQL files referenced by \\i directives."""
+    """Recursively collect SQL files referenced by \\i directives.
+
+    Assumes OHRM dumps use dispatcher-only parent files (containing only
+    \\i lines) and pure-SQL leaf files.  Any non-\\i SQL in a parent file
+    that also contains \\i directives will be silently skipped.
+    """
     # utf-8-sig strips the UTF-8 BOM (\ufeff) that some OHRM files include,
     # which would otherwise prevent \i lines from being recognised.
     for line in script.read_text(encoding="utf-8-sig", errors="replace").splitlines():

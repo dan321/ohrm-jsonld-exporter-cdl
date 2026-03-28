@@ -110,7 +110,7 @@ uv run pytest tests/ -v
 
 The converter follows a single-pass pipeline:
 
-1. **Load:** `loader.py` finds the OHRM's `ohrm/web/sql/` directory, resolves `\i` includes, cleans PostgreSQL syntax (type names, escape sequences, boolean values), and loads everything into a temporary SQLite database. Key edge cases in `clean_sql()`: use `split('\n')` not `splitlines()` (Unicode line separators such as U+2028 can appear inside string literals), read files with `encoding='utf-8-sig'` (some OHRM init scripts have a UTF-8 BOM that breaks `\i` detection), and always emit `CREATE TABLE IF NOT EXISTS` (the same table can appear in both the schema file and data files).
+1. **Load:** `loader.py` finds the OHRM's `ohrm/web/sql/` directory, resolves `\i` includes, cleans PostgreSQL syntax (type names, escape sequences, boolean values), and loads everything into a temporary SQLite database. Key edge cases in `clean_sql()`: use `split('\n')` not `splitlines()` (Unicode line separators such as U+2028 can appear inside string literals), read files with `encoding='utf-8-sig'` (some OHRM init scripts have a UTF-8 BOM that breaks `\i` detection), and always emit `CREATE TABLE IF NOT EXISTS` (the same table can appear in both the schema file and data files). **Loader assumption:** include resolution assumes dispatcher-only parent files (`\i` directives only) and pure-SQL leaf files — any non-`\i` SQL in a file that also contains `\i` directives will be silently skipped. All known OHRM dumps follow this structure.
 
 2. **Export:** 13 exporters each read their table via `fetch_all()`, map rows to JSON-LD entity dicts using `map_properties()`, and extract stub entities (Person, Place, State, Country, Nationality) for deduplication.
 
